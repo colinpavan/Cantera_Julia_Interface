@@ -4,8 +4,8 @@ export one_atm
 using Libdl
 const one_atm=101325.0
 const Ru=8314.46261815324
-# need to find a way to make this reliably find cantera
-const lib=Libdl.dlopen("/usr/local/lib/libcantera_shared.so")
+# this will find cantera provide libcantera_shared.so is on your system path
+const lib=Libdl.dlopen("libcantera_shared.so")
 
 include("cantera_interface_thermo.jl")
 include("cantera_interface_kinetics.jl")
