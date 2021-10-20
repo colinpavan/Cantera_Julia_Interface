@@ -105,7 +105,7 @@ end
 # makes it so only need to access cantera on update
 # not on repeat calls
 # intentionally does NOT do all variables - only the ones needed for a flame
-struct gas_local
+mutable struct gas_local
     G::gas
     T::Float64
     P::Float64
@@ -124,19 +124,19 @@ struct gas_local
 end
 
 function update_gas(GL::gas_local; thermal_only=false)
-    GL.T.=get_T(GL.G)
+    GL.T=get_T(GL.G)
     GL.X.=get_X(GL.G)
     GL.Y.=get_Y(GL.G)
-    GL.λ.=get_λ(GL.G)
-    GL.cp.=get_cp(GL.G)
-    GL.rho.=get_rho(GL.G)
-    GL.mean_MW.=get_mean_MW(GL.G)
+    GL.λ=get_λ(GL.G)
+    GL.cp=get_cp(GL.G)
+    GL.rho=get_rho(GL.G)
+    GL.mean_MW=get_mean_MW(GL.G)
     GL.partial_molar_cp.=get_spec_molar_cp(GL.G)
-    GL.D_mix.=get_D_mix(SL.G)
+    GL.D_mix.=get_D_mix(GL.G)
     if !thermal_only
-        GL.net_production_rates.=net_production_rates(GL.G)
-        GL.hdot.=hdot(SL.G)
-        GL.R.=Ru./GL.mean_MW
+        GL.net_production_rates=net_production_rates(GL.G)
+        GL.hdot=hdot(GL.G)
+        GL.R=Ru./GL.mean_MW
     end
     return nothing
 end

@@ -1,11 +1,6 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate(".")
-
-if (:cantera in names(Main))
-    using Libdl
-    Libdl.dlclose(cantera.lib)
-end
 ct=include("./cantera_interface/cantera_interface.jl")
 
 # gas array with direct cantera interface

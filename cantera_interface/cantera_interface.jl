@@ -5,6 +5,10 @@ using Libdl
 const one_atm=101325.0
 const Ru=8314.46261815324
 # this will find cantera provide libcantera_shared.so is on your system path
+# if statement ensures library only opened once
+if @isdefined lib
+    Libdl.dlclose(lib)
+end
 const lib=Libdl.dlopen("libcantera_shared.so")
 
 include("cantera_interface_thermo.jl")
