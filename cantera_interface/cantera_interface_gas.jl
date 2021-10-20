@@ -37,80 +37,67 @@ function set_T(G::gas,T)
     set_T(G.phase,T)
 end
 
+function get_P(G::gas)
+    return get_P(G.phase)
+end
+function set_P(G::gas,T)
+    set_P(G.phase,T)
+end
+
 function get_X(G::gas)
     return get_X(G.phase)
 end
 
-function get_Y(S::solutionArray)
-    Y=Array{Float64,2}(undef,S.Nel,S.phase[1].nspec)
-    for i=1:S.Nel
-        Y[i,:]=get_Y(S.phase[i])
-    end
-    return Y
+function set_X(G::gas,X)
+    set_X(G.phase,X)
 end
 
-function get_cp(S::solutionArray)
-    cp=[get_cp(c) for c in S.phase]
-    return cp
+function get_Y(G::gas)
+    return get_Y(G.phase)
 end
 
-function get_cv(S::solutionArray)
-    cv=[get_cv(c) for c in S.phase]
-    return cv
+function get_cp(G::gas)
+    return get_cp(G.phase)
 end
 
-function get_λ(S::solutionArray)
-    λ=[thermal_cond(c) for c in S.trans]
-    return λ
+function get_cv(G::gas)
+    return get_cv(G.phase)
 end
 
-function get_rho(S::solutionArray)
-    ρ=[get_rho(c) for c in S.phase]
-    return ρ
+function get_λ(G::gas)
+    return thermal_cond(G.trans)
 end
 
-function get_D_mix(S::solutionArray)
-    D=Array{Float64,2}(undef,S.Nel,S.phase[1].nspec)
-    for i=1:S.Nel
-        D[i,:]=mixture_diff_coeffs(S.trans[i])
-    end
-    return D
+function get_rho(G::gas)
+    return get_rho(G.phase)
 end
 
-function get_mean_MW(S::solutionArray)
-    MW=[get_mean_MW(c) for c in S.phase]
-    return MW
+function get_D_mix(G::gas)
+    return mixture_diff_coeffs(G.trans)
 end
 
-# this doesnt change with position, so just call once
-function get_MW(S::solutionArray)
-    return get_MW(S.phase[1])
+function get_mean_MW(G::gas)
+    return get_mean_MW(G.phase)
 end
 
-function get_spec_molar_cp(S::solutionArray)
-    cp=Array{Float64,2}(undef,S.Nel,S.phase[1].nspec)
-    for i=1:S.Nel
-        cp[i,:]=get_spec_molar_cp(S.phase[i])
-    end
-    return cp
+function get_MW(G::gas)
+    return get_MW(G.phase)
 end
 
-function net_production_rates(S::solutionArray)
-    wdot=Array{Float64,2}(undef,S.Nel,S.phase[1].nspec)
-    for i=1:S.Nel
-        wdot[i,:]=net_production_rates(S.kin[i])
-    end
-    return wdot
+function get_spec_molar_cp(G::gas)
+    return get_spec_molar_cp(G.phase)
 end
 
-function hdot(S::solutionArray)
-    hdot=[sum(net_rates_of_progress(k).*delta_enthalpy(k)) for k in S.kin]
-    return hdot
+function net_production_rates(G::gas)
+    return net_production_rates(G.kin)
 end
 
-function enthalpy(S::solutionArray)
-    h=[get_h(c) for c in S.phase]
-    return h
+function hdot(G::gas)
+    return sum(net_rates_of_progress(G.kin).*delta_enthalpy(G.kin))
+end
+
+function enthalpy(G::gas)
+    return get_h(G.phase)
 end
 
 
@@ -118,80 +105,58 @@ end
 # makes it so only need to access cantera on update
 # not on repeat calls
 # intentionally does NOT do all variables - only the ones needed for a flame
-struct solutionArray_local
-    S::solutionArray
-    T::Array{Float64,1}
+struct gas_local
+    G::gas
+    T::Float64
     P::Float64
-    Y::Array{Float64,2}
-    X::Array{Float64,2}
-    λ::Array{Float64,1}
-    cp::Array{Float64,1}
-    R::Array{Float64,1}
-    rho::Array{Float64,1}
+    Y::Array{Float64,1}
+    X::Array{Float64,1}
+    λ::Float64
+    cp::Float64
+    R::Float64
+    rho::Float64
     spec_MW::Array{Float64,1}
-    mean_MW::Array{Float64,1}
-    partial_molar_cp::Array{Float64,2}
-    D_mix::Array{Float64,2}
-    net_production_rates::Array{Float64,2}
-    hdot::Array{Float64,1}
+    mean_MW::Float64
+    partial_molar_cp::Array{Float64,1}
+    D_mix::Array{Float64,1}
+    net_production_rates::Array{Float64,1}
+    hdot::Float64
 end
 
-function update_gas_array(SL::solutionArray_local; thermal_only=false)
-    SL.T.=get_T(SL.S)
-    SL.X.=get_X(SL.S)
-    SL.Y.=get_Y(SL.S)
-    SL.λ.=get_λ(SL.S)
-    SL.cp.=get_cp(SL.S)
-    SL.rho.=get_rho(SL.S)
-    SL.mean_MW.=get_mean_MW(SL.S)
-    SL.partial_molar_cp.=get_spec_molar_cp(SL.S)
-    SL.D_mix.=get_D_mix(SL.S)
+function update_gas(GL::gas_local; thermal_only=false)
+    GL.T.=get_T(GL.G)
+    GL.X.=get_X(GL.G)
+    GL.Y.=get_Y(GL.G)
+    GL.λ.=get_λ(GL.G)
+    GL.cp.=get_cp(GL.G)
+    GL.rho.=get_rho(GL.G)
+    GL.mean_MW.=get_mean_MW(GL.G)
+    GL.partial_molar_cp.=get_spec_molar_cp(GL.G)
+    GL.D_mix.=get_D_mix(SL.G)
     if !thermal_only
-        SL.net_production_rates.=net_production_rates(SL.S)
-        SL.hdot.=hdot(SL.S)
-        SL.R.=Ru./SL.mean_MW
+        GL.net_production_rates.=net_production_rates(GL.G)
+        GL.hdot.=hdot(SL.G)
+        GL.R.=Ru./GL.mean_MW
     end
     return nothing
 end
 
-function update_gas_array_partial(SL::solutionArray_local, ind; thermal_only=false)
-    for i in ind
-        SL.T[i]=get_T(SL.S.phase[i])
-        SL.X[i,:].=get_X(SL.S.phase[i])
-        SL.Y[i,:].=get_Y(SL.S.phase[i])
-        SL.λ[i]=thermal_cond(SL.S.trans[i])
-        SL.cp[i]=get_cp(SL.S.phase[i])
-        SL.rho[i]=get_rho(SL.S.phase[i])
-        SL.mean_MW[i]=get_mean_MW(SL.S.phase[i])
-        SL.partial_molar_cp[i,:].=get_spec_molar_cp(SL.S.phase[i])
-        SL.D_mix[i,:].=mixture_diff_coeffs(SL.S.trans[i])
-        if !thermal_only
-            SL.net_production_rates[i,:].=net_production_rates(SL.S.kin[i])
-            SL.hdot[i]=sum(net_rates_of_progress(SL.S.kin[i]).*
-                delta_enthalpy(SL.S.kin[i]))
-            SL.R[i]=Ru./SL.mean_MW[i]
-        end
-    end
-    return nothing
-end
-
-
-function solutionArray_local(S::solutionArray)
-    return solutionArray_local(
-        S,
-        get_T(S),
-        get_P(S.phase[1]),
-        get_X(S),
-        get_Y(S),
-        get_λ(S),
-        get_cp(S),
-        get_cp(S).-get_cv(S),
-        get_rho(S),
-        get_MW(S),
-        get_mean_MW(S),
-        get_spec_molar_cp(S),
-        get_D_mix(S),
-        net_production_rates(S),
-        hdot(S)
+function gas_local(G::gas)
+    return gas_local(
+        G,
+        get_T(G),
+        get_P(G),
+        get_X(G),
+        get_Y(G),
+        get_λ(G),
+        get_cp(G),
+        get_cp(G).-get_cv(G),
+        get_rho(G),
+        get_MW(G),
+        get_mean_MW(G),
+        get_spec_molar_cp(G),
+        get_D_mix(G),
+        net_production_rates(G),
+        hdot(G)
     )
 end

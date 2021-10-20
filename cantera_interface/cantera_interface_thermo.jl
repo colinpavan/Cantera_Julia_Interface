@@ -7,8 +7,7 @@ end
 
 # number of species
 function _num_spec(ph::Integer)
-    sym=Libdl.dlsym(lib,:thermo_nSpecies)
-    nspec=ccall(sym,
+    nspec=ccall(Libdl.dlsym(lib,:thermo_nSpecies),
         Csize_t,(Cint,),
         ph)
     return nspec
@@ -42,8 +41,7 @@ function set_T(tbase::thermo_base, T::Float64)
 end
 
 function get_T(tbase::thermo_base)
-    sym=Libdl.dlsym(lib,:thermo_temperature)
-    T=ccall(sym,
+    T=ccall(Libdl.dlsym(lib,:thermo_temperature),
         Float64,(Cint,),
         tbase.ind)
     return T
