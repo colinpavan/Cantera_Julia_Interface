@@ -219,9 +219,23 @@ function set_TPY(thermo::thermo_base,TPY::Tuple{Float64,Float64,Union{String,Arr
     return nothing
 end
 
-
-
-
+# get species names
+function _get_spec_name(tbase::thermo_base,spec_num::Integer)
+    # remember cpp indexes from 0 
+    spec_num-=1   
+    sym=Libdl.dlsym(lib,:thermo_getSpeciesName)
+    nm=""
+    len=ccall(sym,
+        Cint,(Cint,Csize_t,Csize_t,Cstring),
+        tbase.ind,spec_num,1,nm)
+    if len!=0
+        nm=string(0,base=10,pad=len)
+        ccall(sym,
+        Cint,(Cint,Csize_t,Csize_t,Cstring),
+        tbase.ind,spec_num,len,nm)
+    end 
+    return nm[1:len-1]
+end
 
 #=
 # mutable thermo phase object
@@ -263,22 +277,6 @@ end
 
 # working with names and indices
  
-function _get_spec_name(tbase::thermo_base,spec_num::Integer)
-    # remember cpp indexes from 0 
-    spec_num-=1   
-    sym=Libdl.dlsym(tbase.ct_lib,:thermo_getSpeciesName)
-    nm=""
-    len=ccall(sym,
-        Cint,(Cint,Csize_t,Csize_t,Cstring),
-        tbase.ind,spec_num,1,nm)
-    if len!=0
-        nm=string(0,base=10,pad=len)
-        ccall(sym,
-        Cint,(Cint,Csize_t,Csize_t,Cstring),
-        tbase.ind,spec_num,len,nm)
-    end 
-    return nm[1:len-1]
-end
 
 # not working right now
 function _get_spec_index(tbase::thermo_base,spec_name::String)
