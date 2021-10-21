@@ -1,10 +1,11 @@
 # equivalent of python "SolutionArray" object
 # I'm building functionality as I need it
-struct solutionArray
+mutable struct solutionArray
     Nel::Int
     phase::Array{thermo_base,1}
     kin::Array{kin_base,1}
     trans::Array{trans_base,1}
+    file::String
 end
 
 function solutionArray(file::String, Nelement::Int,
@@ -19,7 +20,29 @@ function solutionArray(file::String, Nelement::Int,
         trans[i]=trans_base(phase[i])
         set_TPX(phase[i],init_TPX)
     end
-    return solutionArray(Nelement,phase,kin, trans)
+    return solutionArray(Nelement,phase,kin, trans, file)
+end
+
+function change_size!(S::solutionArray,Nnew::Int)
+    if Nnew<S.Nel
+        S.phase=S.phase[1:Nnew]
+        S.kin=S.kin[1:Nnew]
+        S.trans=S.trans[1:Nnew]
+    elseif  Nnew>S.Nel
+        add=Nnew-S.Nel
+        phase=Array{thermo_base,1}(undef,add)
+        kin=Array{kin_base,1}(undef,add)
+        trans=Array{trans_base,1}(undef,add)
+        for i=1:add
+            phase[i]=thermo_base(S.file)
+            kin[i]=kin_base(S.file, phase[i])
+            trans[i]=trans_base(phase[i])
+        end
+        append!(S.phase,phase)
+        append!(S.kin,kin)
+        append!(S.trans,trans)
+    end
+    S.Nel=Nnew
 end
 
 function get_T(S::solutionArray)
@@ -188,4 +211,9 @@ function solutionArray_local(S::solutionArray)
         net_production_rates(S),
         hdot(S)
     )
+end
+
+function change_size!(SL::solutionArray_local, Nnew::Int)
+    change_size!(SL.S, Nnew)
+    SL=solutionArray_local(SL.S)
 end
