@@ -33,3 +33,8 @@ using BenchmarkTools
 @btime ct.get_T(gas_array)
 # if you are going to access a property more than once
 # it will always be more efficient to store it in the local object
+
+# change size of gas array
+ct.change_size!(gas_array,60)
+ct.change_size!(gas_array,40)
+ct.change_size!(gas_array_local, 70)
