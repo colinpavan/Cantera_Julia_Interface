@@ -31,6 +31,11 @@ gas_array=ct.solutionArray("gri30.yaml",Nel,(300.0,cantera.one_atm,"CH4:1,O2:2,N
 @btime ct.set_T(gas_array,T, thermal_only=true)
 @btime ct.set_T(gas_array,5,400.0)
 @btime ct.set_T(gas_array,5,400.0, thermal_only=true)
+@btime ct.set_TPX(gas_array,10,(400.0, ct.one_atm,"CH4:1,O2:2.5,N2:7.52"))
+@btime ct.set_TPX(gas_array,10,(400.0, ct.one_atm,"CH4:1,O2:2.5,N2:7.52"), thermal_only=true)
+X=gas_array.X[10,:]
+@btime ct.set_TPX(gas_array,10,(400.0, ct.one_atm,X))
+@btime ct.set_TPX(gas_array,10,(400.0, ct.one_atm,X), thermal_only=true)
 
 ct.change_size!(gas_array,200)
 ct.change_size!(gas_array,1000)

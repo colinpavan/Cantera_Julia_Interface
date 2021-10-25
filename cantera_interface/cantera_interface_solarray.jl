@@ -46,32 +46,12 @@ function solutionArray(file::String, Nel::Int,
     spec_MW,mean_MW,partial_molar_cp,D_mix,
     net_production_rates, hdot)
     for i=1:Nel
-        _update_gas_array_single(S,i,get_TPX(g))
+        _fetch_properties(S,i)
     end
     return S
 end
 
-function _update_gas_array_single(S::solutionArray, ind::Int, 
-    TPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}}; thermal_only=false)
-    set_TPX(S.gas,TPX)
-    _get_thermo_props!(S,ind)
-    _get_trans_props!(S,ind)
-    if !thermal_only
-        _get_kin_props!(S,ind)
-    end
-end
-function _update_gas_array_single(S::solutionArray, ind::Int, 
-    T::Float64; thermal_only=false)
-    set_T(S.gas,T)
-    _get_thermo_props!(S,ind)
-    _get_trans_props!(S,ind)
-    if !thermal_only
-        _get_kin_props!(S,ind)
-    end
-end
-function _update_gas_array_single(S::solutionArray, ind::Int, 
-    X::Array{Float64,1}; thermal_only=false)
-    set_X(S.gas,X)
+function _fetch_properties(S::solutionArray,ind::Int,thermal_only::Bool=false)
     _get_thermo_props!(S,ind)
     _get_trans_props!(S,ind)
     if !thermal_only
@@ -99,55 +79,125 @@ function _get_kin_props!(S::solutionArray,ind)
     delta_enthalpy(S.gas.kin))
 end
 
-function update_gas_array_partial(S::solutionArray,ind::Union{Array{Int,1},Int},
-    TPX::Union{Array{Tuple,1},Tuple{Float64,Float64,Union{String,Float64}}})
-    if typeof(TPX)==tuple
-        _update_gas_array_single(S,ind,TPX)
-    else
-        for i=1:length(Ind)
-            _update_gas_array_single(S,ind[i],TPX[i])
-        end
-    end
-end
-
-function update_gas_array(S::solutionArray,TPX::Array{Tuple,1})
-    for i=1:S.Nel
-        _update_gas_array_single(S,i,TPX)
-    end
-end
-
-function set_T(S::solutionArray,ind::Int,T::Float64;thermal_only::Bool=false)
-    _update_gas_array_single(S,ind,T, thermal_only=thermal_only)
+function set_T(S::solutionArray,ind::Int,
+    T::Float64;thermal_only::Bool=false)
+    set_T(S.gas,T)
+    _fetch_properties(S,ind,thermal_only)
     return nothing    
 end
-function set_T(S::solutionArray,ind::Array{Int,1},T::Array{Float64,1};thermal_only::Bool=false)
+
+function set_T(S::solutionArray,ind::Array{Int,1},
+    T::Array{Float64,1};thermal_only::Bool=false)
     for i=1:length(ind)
-        _update_gas_array_single(S,ind[i],T[ind[i]], thermal_only=thermal_only)
-    end
-    return nothing    
-end
-function set_T(S::solutionArray,T::Array{Float64,1};thermal_only::Bool=false)
-    for i=1:S.Nel
-        _update_gas_array_single(S,i,T[i], thermal_only=thermal_only)
+        set_T(S.gas,T[ind[i]])
+        _fetch_properties(S,ind[i],thermal_only)
     end
     return nothing    
 end
 
-function set_X(S::solutionArray,ind::Int,X::Array{Float64,1})
-    _update_gas_array_single(S,ind,X)
-    return nothing    
-end
-function set_X(S::solutionArray,ind::Array{Int,1},X::Array{Float64,2})
-    for i=1:length(ind)
-        _update_gas_array_single(S,ind[i],X[ind[i],:])
-    end
-    return nothing    
-end
-function set_X(S::solutionArray,X::Array{Float64,2})
+function set_T(S::solutionArray,
+    T::Array{Float64,1};thermal_only::Bool=false)
     for i=1:S.Nel
-        _update_gas_array_single(S,i,X[i,:])
+        set_T(S.gas,T[i])
+        _fetch_properties(S,i,thermal_only)
     end
     return nothing    
+end
+
+function set_X(S::solutionArray,ind::Int,
+    X::Array{Float64,1};thermal_only::Bool=false)
+    set_X(S.gas,X)
+    _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+function set_X(S::solutionArray,ind::Array{Int,1},
+    X::Array{Float64,2};thermal_only::Bool=false)
+    for i=1:length(ind)
+        set_T(S.gas,X[ind[i],:])
+        _fetch_properties(S,ind[i],thermal_only)
+    end
+    return nothing    
+end
+
+function set_X(S::solutionArray,X::Array{Float64,2};
+    thermal_only::Bool=false)
+    for i=1:S.Nel
+        set_T(S.gas,X[i,:])
+        _fetch_properties(S,i,thermal_only)
+    end
+end
+
+function set_Y(S::solutionArray,ind::Int,Y::Array{Float64,1};
+    thermal_only::Bool=false)
+    set_Y(S.gas,Y)
+    _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+function set_Y(S::solutionArray,ind::Array{Int,1},Y::Array{Float64,2};
+    thermal_only::Bool=false)
+    for i=1:length(ind)
+        set_T(S.gas,Y[ind[i],:])
+        _fetch_properties(S,ind[i],thermal_only)
+    end
+    return nothing    
+end
+
+function set_Y(S::solutionArray,Y::Array{Float64,2};
+    thermal_only::Bool=false)
+    for i=1:S.Nel
+        set_T(S.gas,Y[i,:])
+        _fetch_properties(S,i,thermal_only)
+    end
+end
+
+function set_TPX(S::solutionArray,ind::Int,
+    TPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
+    set_TPX(S.gas,TPX)
+    _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+function set_TPX(S::solutionArray,ind::Array{Int,1},
+    TPX::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:length(ind)
+        set_TPX(S.gas,TPX[ind[i]])
+        _fetch_properties(S,ind[i],thermal_only)
+    end
+    return nothing    
+end
+
+function set_TPX(S::solutionArray,
+    TPX::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:S.Nel
+        set_TPX(S.gas,TPX[i])
+        _fetch_properties(S,i,thermal_only)
+    end
+end
+
+function set_TPY(S::solutionArray,ind::Int,
+    TPY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
+    set_TPY(S.gas,TPY)
+    _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+function set_TPY(S::solutionArray,ind::Array{Int,1},
+    TPY::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:length(ind)
+        set_TPY(S.gas,TPY[ind[i]])
+        _fetch_properties(S,ind[i],thermal_only)
+    end
+    return nothing    
+end
+
+function set_TPY(S::solutionArray,
+    TPY::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:S.Nel
+        set_TPY(S.gas,TPY[i])
+        _fetch_properties(S,i,thermal_only)
+    end
 end
 
 function change_size!(S::solutionArray,Nnew::Int)
@@ -167,4 +217,5 @@ function change_size!(S::solutionArray,Nnew::Int)
         end
     end
     S.Nel=Nnew
+    return nothing
 end

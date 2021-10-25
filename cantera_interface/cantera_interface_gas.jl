@@ -100,11 +100,11 @@ function enthalpy(G::gas)
     return get_h(G.phase)
 end
 
-function set_TPX(G::gas,TPX::Tuple{Float64,Float64,Array{Float64,1}})
+function set_TPX(G::gas,TPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
     set_TPX(G.phase,TPX)
 end
 
-function set_TPY(G::gas,TPY::Tuple{Float64,Float64,Array{Float64,1}})
+function set_TPY(G::gas,TPY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
     set_TPX(G.phase,TPY)
 end
 
