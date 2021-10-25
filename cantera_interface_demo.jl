@@ -21,24 +21,19 @@ gas2_loc.T
 gas2_loc.X
 
 # gas array - usefull for 1D simulations
-Nel=50
-gas_array=ct.solutionArray("gri30.yaml",Nel,(300.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
-ct.set_T(gas_array,collect(range(300,350,length=50)))
+Nel=500
 # compare timing of local vs library copies - 2 order of magnitude difference!
 using BenchmarkTools
-T=collect(range(300,350,length=50))
+T=collect(range(300,350,length=Nel))
+gas_array=ct.solutionArray("gri30.yaml",Nel,(300.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
+ct.change_size!(gas_array,200)
+ct.change_size!(gas_array,1000)
+
+@btime gas_array=ct.solutionArray("gri30.yaml",Nel,(300.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
 @btime ct.set_T(gas_array,T)
 @btime ct.set_T(gas_array,T, thermal_only=true)
 @btime ct.set_T(gas_array,5,400.0)
 @btime ct.set_T(gas_array,5,400.0, thermal_only=true)
-# compare to setting for gas only
-@btime ct.set_T(gas2,400.0)
-# 3 orders of magnitude different???!!!!
-@btime gas_array.T
-# if you are going to access a property more than once
-# it will always be more efficient to store it in the local object
 
-# change size of gas array
-ct.change_size!(gas_array,60)
-ct.change_size!(gas_array,40)
-ct.change_size!(gas_array_local, 70)
+ct.change_size!(gas_array,200)
+ct.change_size!(gas_array,1000)
