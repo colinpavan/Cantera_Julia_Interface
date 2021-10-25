@@ -26,9 +26,6 @@ Nel=500
 using BenchmarkTools
 T=collect(range(300,350,length=Nel))
 gas_array=ct.solutionArray("gri30.yaml",Nel,(300.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
-ct.change_size!(gas_array,200)
-ct.change_size!(gas_array,1000)
-
 @btime gas_array=ct.solutionArray("gri30.yaml",Nel,(300.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
 @btime ct.set_T(gas_array,T)
 @btime ct.set_T(gas_array,T, thermal_only=true)
