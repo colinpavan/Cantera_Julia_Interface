@@ -213,7 +213,7 @@ function solutionArray_local(S::solutionArray)
     )
 end
 
-function change_size!(SL::solutionArray_local, Nnew::Int)
+function change_size(SL::solutionArray_local, Nnew::Int)
     change_size!(SL.S, Nnew)
-    SL=solutionArray_local(SL.S)
+    return solutionArray_local(SL.S)
 end
