@@ -33,15 +33,15 @@ end
 function get_T(G::gas)
     return get_T(G.phase)
 end
-function set_T(G::gas,T)
+function set_T(G::gas,T::Float64)
     set_T(G.phase,T)
 end
 
 function get_P(G::gas)
     return get_P(G.phase)
 end
-function set_P(G::gas,T)
-    set_P(G.phase,T)
+function set_P(G::gas,P::Float64)
+    set_P(G.phase,P)
 end
 
 function get_X(G::gas)
@@ -100,7 +100,20 @@ function enthalpy(G::gas)
     return get_h(G.phase)
 end
 
+function set_TPX(G::gas,TPX::Tuple{Float64,Float64,Array{Float64,1}})
+    set_TPX(G.phase,TPX)
+end
 
+function set_TPY(G::gas,TPY::Tuple{Float64,Float64,Array{Float64,1}})
+    set_TPX(G.phase,TPY)
+end
+
+function get_TPX(G)
+    return (get_T(G),get_P(G),get_X(G))
+end
+function get_TPY(G)
+    return (get_T(G),get_P(G),get_Y(G))
+end
 # this evaluates all the above and stores them in local variables
 # makes it so only need to access cantera on update
 # not on repeat calls
