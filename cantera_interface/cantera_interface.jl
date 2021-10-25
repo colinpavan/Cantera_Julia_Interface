@@ -14,8 +14,8 @@ const lib=Libdl.dlopen("libcantera_shared.so")
 include("cantera_interface_thermo.jl")
 include("cantera_interface_kinetics.jl")
 include("cantera_interface_transport.jl")
-include("cantera_interface_solarray.jl")
 include("cantera_interface_gas.jl")
+include("cantera_interface_solarray.jl")
 
 
 function ct_error_get()
