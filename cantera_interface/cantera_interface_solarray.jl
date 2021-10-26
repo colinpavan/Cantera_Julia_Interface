@@ -204,7 +204,7 @@ function change_size!(S::solutionArray,Nnew::Int)
     fields=fieldnames(typeof(S))
     for k in 1:length(fields)
         tmp=getfield(S,k)
-        if isa(tmp,Array)
+        if isa(tmp,Array) && size(tmp,1)==S.Nel
             if size(tmp,2)==1
                 tmp_new=Array{Float64,1}(undef,Nnew)
             else
