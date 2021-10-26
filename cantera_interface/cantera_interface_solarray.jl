@@ -114,7 +114,7 @@ end
 function set_X(S::solutionArray,ind::Array{Int,1},
     X::Array{Float64,2};thermal_only::Bool=false)
     for i=1:length(ind)
-        set_T(S.gas,X[ind[i],:])
+        set_X(S.gas,X[ind[i],:])
         _fetch_properties(S,ind[i],thermal_only)
     end
     return nothing    
@@ -123,7 +123,7 @@ end
 function set_X(S::solutionArray,X::Array{Float64,2};
     thermal_only::Bool=false)
     for i=1:S.Nel
-        set_T(S.gas,X[i,:])
+        set_X(S.gas,X[i,:])
         _fetch_properties(S,i,thermal_only)
     end
 end
@@ -138,7 +138,7 @@ end
 function set_Y(S::solutionArray,ind::Array{Int,1},Y::Array{Float64,2};
     thermal_only::Bool=false)
     for i=1:length(ind)
-        set_T(S.gas,Y[ind[i],:])
+        set_Y(S.gas,Y[ind[i],:])
         _fetch_properties(S,ind[i],thermal_only)
     end
     return nothing    
@@ -147,7 +147,7 @@ end
 function set_Y(S::solutionArray,Y::Array{Float64,2};
     thermal_only::Bool=false)
     for i=1:S.Nel
-        set_T(S.gas,Y[i,:])
+        set_Y(S.gas,Y[i,:])
         _fetch_properties(S,i,thermal_only)
     end
 end
