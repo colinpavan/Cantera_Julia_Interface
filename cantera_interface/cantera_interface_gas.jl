@@ -105,7 +105,7 @@ function set_TPX(G::gas,TPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}
 end
 
 function set_TPY(G::gas,TPY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
-    set_TPX(G.phase,TPY)
+    set_TPY(G.phase,TPY)
 end
 
 function get_TPX(G)
