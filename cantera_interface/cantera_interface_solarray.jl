@@ -29,14 +29,14 @@ function solutionArray(file::String, Nel::Int,
     end
     Nspec=g.Nspec
     T=Array{Float64,1}(undef,Nel)
-    P=0.0
+    P=init_TPX[2]
     Y=Array{Float64,2}(undef,Nel,Nspec)
     X=Array{Float64,2}(undef,Nel,Nspec)
     λ=Array{Float64,1}(undef,Nel)
     cp=Array{Float64,1}(undef,Nel)
     R=Array{Float64,1}(undef,Nel)
     rho=Array{Float64,1}(undef,Nel)
-    spec_MW=Array{Float64,1}(undef,Nel)
+    spec_MW=get_MW(g.phase)
     mean_MW=Array{Float64,1}(undef,Nel)
     partial_molar_cp=Array{Float64,2}(undef,Nel,Nspec)
     D_mix=Array{Float64,2}(undef,Nel,Nspec)
