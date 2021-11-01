@@ -9,7 +9,7 @@ const Ru=8314.46261815324
 if @isdefined lib
     Libdl.dlclose(lib)
 end
-const lib=Libdl.dlopen("libcantera_shared.so")
+const lib=Libdl.dlopen("/usr/local/lib/libcantera_shared.so")
 
 include("cantera_interface_thermo.jl")
 include("cantera_interface_kinetics.jl")
