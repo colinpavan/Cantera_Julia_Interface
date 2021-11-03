@@ -7,21 +7,37 @@ ct=include("./cantera_interface/cantera_interface.jl")
 # gas with direct cantera interface
 gas1=ct.gas("gri30.yaml")
 # same as above with initialization of TPX
-gas2=ct.gas("gri30.yaml",(300.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
-# this stores a local copy (inside julia) for faster access
-gas2_loc=ct.gas_local(gas2)
-# change the temperature
-ct.set_T(gas2,500.0)
-# note this isn't changed in the local copy
-gas2_loc.T
-# update the local copy
-ct.update_gas(gas2_loc)
-# now the local copy is updated
-gas2_loc.T
-gas2_loc.X
+gas2=ct.gas("gri30.yaml",(1500.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
+# testing 0D simulation
 
-# gas array - usefull for 1D simulations
-Nel=500
+r=ct.reactor(gas2,"ConstPressureReactor")
+ct.reactor_sim_full(r,1e-1)
+ct.get_TPY(gas2)
+ct.ct_error_get()
+
+using BenchmarkTools
+gas2=ct.gas("gri30.yaml",(1500.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
+r=ct.reactor(gas2,"IdealGasConstPressureReactor")
+@btime ct.reactor_sim_full(r,1e-1)
+gas2=ct.gas("gri30.yaml",(1500.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
+r2=ct.reactor(gas2,"ConstPressureReactor")
+@btime ct.reactor_sim_full(r2,1e-1)
+gas2=ct.gas("gri30.yaml",(1500.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
+r3=ct.reactor(gas2,"IdealGasConstPressureReactor")
+RN=ct.reactor_sim_initialize(r3)
+tmax=1e-1
+@btime ct.reactor_sim_advance(RN,tmax)
+using PyCall
+gas2=ct.gas("gri30.yaml",(1500.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
+ctp=pyimport("cantera")
+gas=ctp.Solution("gri30.yaml")
+r3=ctp.IdealGasConstPressureReactor()
+gas.TPX=ct.get_T(gas2),ct.get_P(gas2),ct.get_X(gas2)
+r3.insert(gas)
+sim=ctp.ReactorNet([r3])
+@btime sim.advance(1e-1)
+tmp=sim.get_state()
+
 # compare timing of local vs library copies - 2 order of magnitude difference!
 using BenchmarkTools
 T=collect(range(300,350,length=Nel))
