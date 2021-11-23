@@ -4,7 +4,7 @@ mutable struct solutionArray
     Nel::Int
     gas::gas
     T::Array{Float64,1}
-    P::Float64
+    P::Array{Float64,1}
     Y::Array{Float64,2}
     X::Array{Float64,2}
     λ::Array{Float64,1}
@@ -29,7 +29,7 @@ function solutionArray(file::String, Nel::Int,
     end
     Nspec=g.Nspec
     T=Array{Float64,1}(undef,Nel)
-    P=init_TPX[2]
+    P=Array{Float64,1}(undef,Nel)
     Y=Array{Float64,2}(undef,Nel,Nspec)
     X=Array{Float64,2}(undef,Nel,Nspec)
     λ=Array{Float64,1}(undef,Nel)
@@ -61,6 +61,7 @@ end
 
 function _get_thermo_props!(S::solutionArray,ind)
     S.T[ind]=get_T(S.gas)
+    S.P[ind]=get_P(S.gas)
     S.X[ind,:].=get_X(S.gas)
     S.Y[ind,:].=get_Y(S.gas)
     S.cp[ind]=get_cp(S.gas)
