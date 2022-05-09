@@ -160,13 +160,33 @@ function get_cp_mole(tbase::thermo_base)
     return cp
 end
 
-# enthalpy
+# Enthalpy access functions
+# get enthalpy
 function get_h(tbase::thermo_base)
     sym=Libdl.dlsym(lib,:thermo_enthalpy_mass)
     h=ccall(sym,
         Float64,(Cint,),
         tbase.ind)
     return h
+end
+
+# set enthalpy (with pressure)
+function set_HP(tbase::thermo_base,HP::Array{Float64,1})
+    sym=Libdl.dlsym(lib,:thermo_set_HP)
+    ccall(sym,
+        Cint,(Cint,Ptr{Cdouble}),
+        tbase.ind,HP)
+    return nothing
+end
+
+# set enthalpy (using existing pressure)
+function set_H(tbase::thermo_base,H::Float64)
+    sym=Libdl.dlsym(lib,:thermo_set_HP)
+    P=get_P(tbase)
+    ccall(sym,
+        Cint,(Cint,Ptr{Cdouble}),
+        tbase.ind,[H,P])
+    return nothing
 end
 
 
@@ -216,6 +236,17 @@ function set_TPY(thermo::thermo_base,TPY::Tuple{Float64,Float64,Union{String,Arr
     set_P(thermo,TPY[2])
     return nothing
 end
+function set_HPX(thermo::thermo_base,HPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
+    set_Y(thermo,HPX[3])
+    set_HP(thermo,HPX[1:2])
+    return nothing
+end
+function set_HPY(thermo::thermo_base,HPY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
+    set_Y(thermo,HPY[3])
+    set_HP(thermo,HPY[1:2])
+    return nothing
+end
+
 
 # get species names
 function _get_spec_name(tbase::thermo_base,spec_num::Integer)
