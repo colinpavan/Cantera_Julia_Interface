@@ -200,6 +200,62 @@ function set_TPY(S::solutionArray,
     end
 end
 
+# property setting via HPY
+# single index
+function set_HPY(S::solutionArray,ind::Int,
+    HPY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
+    set_HPY(S.gas,HPY)
+    _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+# multi index
+function set_HPY(S::solutionArray,ind::Array{Int,1},
+    HPY::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:length(ind)
+        set_HPY(S.gas,HPY[ind[i]])
+        _fetch_properties(S,ind[i],thermal_only)
+    end
+    return nothing    
+end
+
+# all elements
+function set_HPY(S::solutionArray,
+    HPY::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:S.Nel
+        set_HPY(S.gas,HPY[i])
+        _fetch_properties(S,i,thermal_only)
+    end
+end
+
+# property setting via HPX
+# single index
+function set_HPX(S::solutionArray,ind::Int,
+    HPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
+    set_HPY(S.gas,HPX)
+    _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+# multi index
+function set_HPX(S::solutionArray,ind::Array{Int,1},
+    HPX::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:length(ind)
+        set_HPX(S.gas,HPX[ind[i]])
+        _fetch_properties(S,ind[i],thermal_only)
+    end
+    return nothing    
+end
+
+# all elements
+function set_HPX(S::solutionArray,
+    HPX::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:S.Nel
+        set_HPX(S.gas,HPX[i])
+        _fetch_properties(S,i,thermal_only)
+    end
+end
+
 function change_size!(S::solutionArray,Nnew::Int)
     fields=fieldnames(typeof(S))
     for k in 1:length(fields)

@@ -171,11 +171,12 @@ function get_h(tbase::thermo_base)
 end
 
 # set enthalpy (with pressure)
-function set_HP(tbase::thermo_base,HP::Array{Float64,1})
+function set_HP(tbase::thermo_base,HP::Tuple{Float64,Float64})
     sym=Libdl.dlsym(lib,:thermo_set_HP)
+    HP_vec=[HP[1],HP[2]]
     ccall(sym,
         Cint,(Cint,Ptr{Cdouble}),
-        tbase.ind,HP)
+        tbase.ind,HP_vec)
     return nothing
 end
 
