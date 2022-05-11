@@ -112,6 +112,9 @@ function set_H(G::gas,H::Float64)
     return set_H(G.phase, H)
 end
 
+function get_e(G::gas)
+    return get_e(G.phase)
+end
 
 function set_TPX(G::gas,TPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
     set_TPX(G.phase,TPX)
@@ -128,11 +131,25 @@ function set_HPX(G::gas,HPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}
     set_HPY(G.phase,HPX)
 end
 
+function set_ERY(G::gas,ERY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
+    set_ERY(G.phase,ERY)
+end
+function set_ERX(G::gas,ERX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
+    set_ERY(G.phase,ERX)
+end
+
 function get_TPX(G)
     return (get_T(G),get_P(G),get_X(G))
 end
 function get_TPY(G)
     return (get_T(G),get_P(G),get_Y(G))
+end
+
+function get_ERX(G)
+    return (get_e(G),get_rho(G),get_X(G))
+end
+function get_ERY(G)
+    return (get_e(G),get_rho(G),get_Y(G))
 end
 # this evaluates all the above and stores them in local variables
 # makes it so only need to access cantera on update
