@@ -180,16 +180,35 @@ function set_HP(tbase::thermo_base,HP::Tuple{Float64,Float64})
     return nothing
 end
 
-# set enthalpy (using existing pressure)
-function set_H(tbase::thermo_base,H::Float64)
-    sym=Libdl.dlsym(lib,:thermo_set_HP)
-    P=get_P(tbase)
+# Internal Energy access functions
+# get E
+function get_e(tbase::thermo_base)
+    sym=Libdl.dlsym(lib,:thermo_intEnergy_mass)
+    e=ccall(sym,
+        Float64,(Cint,),
+        tbase.ind)
+    return e
+end
+
+# set internal energy (with pressure)
+function set_EP(tbase::thermo_base,EP::Tuple{Float64,Float64})
+    sym=Libdl.dlsym(lib,:thermo_set_UP)
+    EP_vec=[EP[1],EP[2]]
     ccall(sym,
         Cint,(Cint,Ptr{Cdouble}),
-        tbase.ind,[H,P])
+        tbase.ind,EP_vec)
     return nothing
 end
 
+# set internal energy (with density)
+function set_ER(tbase::thermo_base,ER::Tuple{Float64,Float64})
+    sym=Libdl.dlsym(lib,:thermo_set_UV)
+    EV_vec=[ER[1],1/ER[2]]
+    ccall(sym,
+        Cint,(Cint,Ptr{Cdouble}),
+        tbase.ind,EV_vec)
+    return nothing
+end
 
 # mean molecular weight
 function get_mean_MW(tbase::thermo_base)
@@ -248,6 +267,19 @@ function set_HPY(thermo::thermo_base,HPY::Tuple{Float64,Float64,Union{String,Arr
     return nothing
 end
 
+# set by internal energy (E), density (R) and mass fraction (Y)
+function set_ERY(thermo::thermo_base,ERY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
+    set_Y(thermo,ERY[3])
+    set_ER(thermo,ERY[1:2])
+    return nothing
+end
+
+# set by internal energy (E), density (R) and mole fraction (X)
+function set_ERX(thermo::thermo_base,ERX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
+    set_X(thermo,ERX[3])
+    set_ER(thermo,ERX[1:2])
+    return nothing
+end
 
 # get species names
 function _get_spec_name(tbase::thermo_base,spec_num::Integer)
