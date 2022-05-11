@@ -11,6 +11,8 @@ mutable struct solutionArray
     cp::Array{Float64,1}
     R::Array{Float64,1}
     rho::Array{Float64,1}
+    h::Array{Float64,1}
+    e::Array{Float64,1}
     spec_MW::Array{Float64,1}
     mean_MW::Array{Float64,1}
     partial_molar_cp::Array{Float64,2}
@@ -36,13 +38,15 @@ function solutionArray(file::String, Nel::Int,
     cp=Array{Float64,1}(undef,Nel)
     R=Array{Float64,1}(undef,Nel)
     rho=Array{Float64,1}(undef,Nel)
+    h=Array{Float64,1}(undef,Nel)
+    e=Array{Float64,1}(undef,Nel)
     spec_MW=get_MW(g.phase)
     mean_MW=Array{Float64,1}(undef,Nel)
     partial_molar_cp=Array{Float64,2}(undef,Nel,Nspec)
     D_mix=Array{Float64,2}(undef,Nel,Nspec)
     net_production_rates=Array{Float64,2}(undef,Nel,Nspec)
     hdot=Array{Float64,1}(undef,Nel)    
-    S=solutionArray(Nel, g,T,P,Y,X,λ,cp,R,rho,
+    S=solutionArray(Nel, g,T,P,Y,X,λ,cp,R,rho,h,e,
     spec_MW,mean_MW,partial_molar_cp,D_mix,
     net_production_rates, hdot)
     for i=1:Nel
@@ -68,6 +72,8 @@ function _get_thermo_props!(S::solutionArray,ind)
     S.mean_MW[ind]=get_mean_MW(S.gas)
     S.partial_molar_cp[ind,:].=get_spec_molar_cp(S.gas) 
     S.R[ind]=Ru./S.mean_MW[ind]
+    S.h[ind]=get_h(S.gas)
+    S.e[ind]=get_e(S.gas)
 end
 function _get_trans_props!(S::solutionArray,ind)
     S.λ[ind]=get_λ(S.gas)
@@ -252,6 +258,62 @@ function set_HPX(S::solutionArray,
     HPX::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
     for i=1:S.Nel
         set_HPX(S.gas,HPX[i])
+        _fetch_properties(S,i,thermal_only)
+    end
+end
+
+# property setting via ERY
+# single index
+function set_ERY(S::solutionArray,ind::Int,
+    ERY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
+    set_ERY(S.gas,ERY)
+    _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+# multi index
+function set_ERY(S::solutionArray,ind::Array{Int,1},
+    ERY::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:length(ind)
+        set_ERY(S.gas,ERY[ind[i]])
+        _fetch_properties(S,ind[i],thermal_only)
+    end
+    return nothing    
+end
+
+# all elements
+function set_ERY(S::solutionArray,
+    ERY::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:S.Nel
+        set_HPY(S.gas,ERY[i])
+        _fetch_properties(S,i,thermal_only)
+    end
+end
+
+# property setting via ERX
+# single index
+function set_ERX(S::solutionArray,ind::Int,
+    ERX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
+    set_ERX(S.gas,ERX)
+    _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+# multi index
+function set_ERX(S::solutionArray,ind::Array{Int,1},
+    ERX::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:length(ind)
+        set_ERX(S.gas,ERX[ind[i]])
+        _fetch_properties(S,ind[i],thermal_only)
+    end
+    return nothing    
+end
+
+# all elements
+function set_ERX(S::solutionArray,
+    ERX::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
+    for i=1:S.Nel
+        set_HPY(S.gas,ERX[i])
         _fetch_properties(S,i,thermal_only)
     end
 end
