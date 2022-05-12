@@ -135,7 +135,7 @@ function set_ERY(G::gas,ERY::Tuple{Float64,Float64,Union{String,Array{Float64,1}
     set_ERY(G.phase,ERY)
 end
 function set_ERX(G::gas,ERX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
-    set_ERY(G.phase,ERX)
+    set_ERX(G.phase,ERX)
 end
 
 function get_TPX(G)
