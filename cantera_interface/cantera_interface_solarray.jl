@@ -286,7 +286,7 @@ end
 function set_ERY(S::solutionArray,
     ERY::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
     for i=1:S.Nel
-        set_HPY(S.gas,ERY[i])
+        set_ERY(S.gas,ERY[i])
         _fetch_properties(S,i,thermal_only)
     end
 end
@@ -314,7 +314,7 @@ end
 function set_ERX(S::solutionArray,
     ERX::Array{Tuple{Float64,Float64,Array{Float64,1}},1};thermal_only::Bool=false)
     for i=1:S.Nel
-        set_HPY(S.gas,ERX[i])
+        set_ERX(S.gas,ERX[i])
         _fetch_properties(S,i,thermal_only)
     end
 end
