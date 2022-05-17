@@ -47,7 +47,7 @@ function net_production_rates(kbase::kin_base)
     netprod=Array{Float64,1}(undef,kbase.nspec)
     ccall(sym,
         Cint,(Cint,Csize_t,Ptr{Cdouble}),
-        kbase.ind, kbase.nreact,netprod)
+        kbase.ind, kbase.nspec,netprod)
     return netprod
 end
 
