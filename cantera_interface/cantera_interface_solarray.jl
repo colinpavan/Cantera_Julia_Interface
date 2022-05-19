@@ -239,7 +239,7 @@ end
 # single index
 function set_HPX(S::solutionArray,ind::Int,
     HPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
-    set_HPY(S.gas,HPX)
+    set_HPX(S.gas,HPX)
     _fetch_properties(S,ind,thermal_only)
     return nothing    
 end
