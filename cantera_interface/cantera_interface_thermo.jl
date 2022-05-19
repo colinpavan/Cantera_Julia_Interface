@@ -240,6 +240,16 @@ function get_spec_molar_cp(tbase::thermo_base)
     return cp
 end
 
+# species enthalpies
+function get_spec_molar_enthalpies(tbase::thermo_base)
+    sym=Libdl.dlsym(lib,:thermo_getEnthalpies_RT)
+    h=Array{Float64,1}(undef, tbase.nspec)
+    ccall(sym,
+        Cint,(Cint,Csize_t,Ptr{Cdouble}),
+        tbase.ind, tbase.nspec,h)
+    h*=Ru*get_T(tbase)
+    return h
+end 
 
 
 # multi-parameter setters

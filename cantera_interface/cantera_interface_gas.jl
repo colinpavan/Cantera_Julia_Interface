@@ -88,6 +88,10 @@ function get_spec_molar_cp(G::gas)
     return get_spec_molar_cp(G.phase)
 end
 
+function get_spec_molar_enthalpies(G::gas)
+    return get_spec_molar_enthalpies(G.phase)
+end
+
 function net_production_rates(G::gas)
     return net_production_rates(G.kin)
 end
