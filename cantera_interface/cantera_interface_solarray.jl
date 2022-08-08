@@ -55,6 +55,7 @@ function solutionArray(file::String, Nel::Int,
     return S
 end
 
+# this version uses the gas object associated with solution array
 function _fetch_properties(S::solutionArray,ind::Int,thermal_only::Bool=false)
     _get_thermo_props!(S,ind)
     _get_trans_props!(S,ind)
@@ -63,6 +64,16 @@ function _fetch_properties(S::solutionArray,ind::Int,thermal_only::Bool=false)
     end
 end
 
+# this version passes in a separate gas object (used for multithreading)
+function _fetch_properties(S::solutionArray,G::gas, ind::Int,thermal_only::Bool=false)
+    _get_thermo_props!(S,G,ind)
+    _get_trans_props!(S,G,ind)
+    if !thermal_only
+        _get_kin_props!(S,G,ind)
+    end
+end
+
+# these versions use the gas object associated with the array
 function _get_thermo_props!(S::solutionArray,ind)
     S.T[ind]=get_T(S.gas)
     S.X[ind,:].=get_X(S.gas)
@@ -84,6 +95,30 @@ function _get_kin_props!(S::solutionArray,ind)
     S.net_production_rates[ind,:].=net_production_rates(S.gas.kin)
     S.hdot[ind]=sum(net_rates_of_progress(S.gas.kin).*
     delta_enthalpy(S.gas.kin))
+end
+
+# these verisons use a separate gas object
+function _get_thermo_props!(S::solutionArray,G::gas,ind::Int64)
+    S.T[ind]=get_T(G)
+    S.X[ind,:].=get_X(G)
+    S.Y[ind,:].=get_Y(G)
+    S.cp[ind]=get_cp(G)
+    S.rho[ind]=get_rho(G)
+    S.mean_MW[ind]=get_mean_MW(G)
+    S.partial_molar_h[ind,:].=get_spec_molar_enthalpies(G) 
+    S.R[ind]=Ru./S.mean_MW[ind]
+    S.h[ind]=get_h(G)
+    S.e[ind]=get_e(G)
+    S.P[ind]=get_P(G)
+end
+function _get_trans_props!(S::solutionArray,G::gas,ind::Int64)
+    S.λ[ind]=get_λ(G)
+    S.D_mix[ind,:].=mixture_diff_coeffs(G.trans)
+end
+function _get_kin_props!(S::solutionArray,G::gas,ind::Int64)
+    S.net_production_rates[ind,:].=net_production_rates(G.kin)
+    S.hdot[ind]=sum(net_rates_of_progress(G.kin).*
+    delta_enthalpy(G.kin))
 end
 
 function set_T(S::solutionArray,ind::Int,
@@ -269,6 +304,14 @@ function set_ERY(S::solutionArray,ind::Int,
     ERY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
     set_ERY(S.gas,ERY)
     _fetch_properties(S,ind,thermal_only)
+    return nothing    
+end
+
+# single index with separate gas array
+function set_ERY(S::solutionArray,G::gas, ind::Int,
+    ERY::Tuple{Float64,Float64,Union{String,Array{Float64,1}}};thermal_only::Bool=false)
+    set_ERY(G,ERY)
+    _fetch_properties(S,G,ind,thermal_only)
     return nothing    
 end
 
