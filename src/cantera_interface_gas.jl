@@ -64,11 +64,11 @@ end
 
 ############## Multi-thermo setter functions ############
 
-function set_HP(G::gas,HP::Array{Float64,1})
+function set_HP(G::gas,HP::Tuple{Float64,Float64})
     return set_HP(G.phase, HP)
 end
 
-function set_TR(G::gas,TR::Array{Float64,1})
+function set_TR(G::gas,TR::Tuple{Float64,Float64})
     return set_TR(G.phase, TR)
 end
 
