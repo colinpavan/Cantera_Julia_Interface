@@ -106,11 +106,8 @@ end
 
 # set temp + density
 function set_TR(tbase::thermo_base,TR::Tuple{Float64,Float64})
-    sym=Libdl.dlsym(lib,:thermo_set_TV)
-    TV_vec=[TR[1],1/TR[2]]
-    ccall(sym,
-        Cint,(Cint,Ptr{Cdouble}),
-        tbase.ind,TV_vec)
+    set_T(tbase,TR[1])
+    set_rho(tbase,TR[2])
     return nothing
 end
 
