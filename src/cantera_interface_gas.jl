@@ -1,5 +1,3 @@
-# equivalent of python "SolutionArray" object
-# I'm building functionality as I need it
 struct gas
     Nspec::Int
     spec_names::Array{String,1}
@@ -9,7 +7,7 @@ struct gas
 end
 
 # case for not initializing TPX
-function gas(file::String; full_path::Bool=false)
+function gas(file::String; full_path::Bool=true)
     phase=thermo_base(file,full_path=full_path)
     kin=kin_base(file,phase, full_path=full_path)
     trans=trans_base(phase)
@@ -20,7 +18,7 @@ end
 
 # case for initializing TPX
 function gas(file::String, init_TPX::Tuple{Float64,Float64,Union{String,Float64}};
-    full_path::Bool=false)
+    full_path::Bool=true)
     phase=thermo_base(file,full_path=full_path)
     kin=kin_base(file,phase, full_path=full_path)
     trans=trans_base(phase)
@@ -30,6 +28,8 @@ function gas(file::String, init_TPX::Tuple{Float64,Float64,Union{String,Float64}
     return gas(Nspec,spec_names,phase,kin,trans)
 end
 
+# common getter/setter functions
+# using these setters is highly discouraged
 function get_T(G::gas)
     return get_T(G.phase)
 end
@@ -120,6 +120,9 @@ function get_e(G::gas)
     return get_e(G.phase)
 end
 
+
+# functions for setting full state (use these, NOT above)
+
 function set_TPX(G::gas,TPX::Tuple{Float64,Float64,Union{String,Array{Float64,1}}})
     set_TPX(G.phase,TPX)
 end
@@ -155,6 +158,8 @@ end
 function get_ERY(G)
     return (get_e(G),get_rho(G),get_Y(G))
 end
+
+
 # this evaluates all the above and stores them in local variables
 # makes it so only need to access cantera on update
 # not on repeat calls

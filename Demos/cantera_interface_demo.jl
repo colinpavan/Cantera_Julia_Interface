@@ -1,19 +1,21 @@
 cd(@__DIR__)
 using Pkg
 Pkg.activate(".")
-# to use this, the library libcantera_shared.so must be on your system search path
-ct=include("./cantera_interface/cantera_interface.jl")
+push!(Base.DL_LOAD_PATH,"/usr/local/lib/") # change this to wherever libcantera_shared.so is on your machine)
+include("../cantera_interface.jl")
+using .cantera
+ct=cantera
 
 # gas with direct cantera interface
-gas1=ct.gas("gri30.yaml")
+gas1=ct.gas("gri30.yaml", full_path=false) # if full_path = false, looks where cantera stores its files normally
 # same as above with initialization of TPX
 gas2=ct.gas("gri30.yaml",(1500.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
-# testing 0D simulation
 
+# testing 0D simulation
 r=ct.reactor(gas2,"ConstPressureReactor")
 ct.reactor_sim_full(r,1e-1)
 ct.get_TPY(gas2)
-ct.ct_error_get()
+ct.ct_error_get() # check for errors
 
 using BenchmarkTools
 gas2=ct.gas("gri30.yaml",(1500.0,cantera.one_atm,"CH4:1,O2:2,N2:7.52"))
