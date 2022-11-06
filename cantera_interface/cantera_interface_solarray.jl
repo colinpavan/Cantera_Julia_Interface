@@ -9,6 +9,7 @@ mutable struct solutionArray
     X::Array{Float64,2}
     λ::Array{Float64,1}
     cp::Array{Float64,1}
+    cv::Array{Float64,1}
     R::Array{Float64,1}
     rho::Array{Float64,1}
     h::Array{Float64,1}
@@ -36,6 +37,7 @@ function solutionArray(file::String, Nel::Int,
     X=Array{Float64,2}(undef,Nel,Nspec)
     λ=Array{Float64,1}(undef,Nel)
     cp=Array{Float64,1}(undef,Nel)
+    cv=Array{Float64,1}(undef,Nel)
     R=Array{Float64,1}(undef,Nel)
     rho=Array{Float64,1}(undef,Nel)
     h=Array{Float64,1}(undef,Nel)
@@ -46,7 +48,7 @@ function solutionArray(file::String, Nel::Int,
     D_mix=Array{Float64,2}(undef,Nel,Nspec)
     net_production_rates=Array{Float64,2}(undef,Nel,Nspec)
     hdot=Array{Float64,1}(undef,Nel)    
-    S=solutionArray(Nel, g,T,P,Y,X,λ,cp,R,rho,h,e,
+    S=solutionArray(Nel, g,T,P,Y,X,λ,cp,cv,R,rho,h,e,
     spec_MW,mean_MW,partial_molar_h,D_mix,
     net_production_rates, hdot)
     for i=1:Nel
@@ -68,6 +70,7 @@ function _get_thermo_props!(S::solutionArray,ind)
     S.X[ind,:].=get_X(S.gas)
     S.Y[ind,:].=get_Y(S.gas)
     S.cp[ind]=get_cp(S.gas)
+    S.cv[ind]=get_cv(S.gas)
     S.rho[ind]=get_rho(S.gas)
     S.mean_MW[ind]=get_mean_MW(S.gas)
     S.partial_molar_h[ind,:].=get_spec_molar_enthalpies(S.gas) 
