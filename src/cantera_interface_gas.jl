@@ -155,6 +155,9 @@ function get_e(G::gas)
     return get_e(G.phase)
 end
 
+function get_spec_heat_ratio(G::gas)
+    return get_cp(G.phase)/get_cv(G.phase)
+end
 
 ##########3 Composition getter functions ############
 # by mole fraction
