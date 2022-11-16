@@ -58,8 +58,8 @@ end
 
 ############# Composition setter functions ###########3
 # by mole fraction
-function set_X(G::gas,X)
-    set_X(G.phase,X)
+function set_X(G::gas,X::AbstractVector{Float64}, norm::Bool=true)
+    set_X(G.phase,X, norm)
 end
 
 ############## Multi-thermo setter functions ############
@@ -155,6 +155,18 @@ function get_e(G::gas)
     return get_e(G.phase)
 end
 
+function get_spec_heat_ratio(G::gas)
+    return get_cp(G.phase)/get_cv(G.phase)
+end
+
+function get_n(G::gas)
+   return get_X(G.phase)*(get_P(G.phase)/(1.380649e-23*get_T(G.phase))) 
+end
+
+function get_ncm3(G::gas)
+    return get_X(G.phase)*(get_P(G.phase)/(1.380649e-17*get_T(G.phase))) 
+ end
+ 
 
 ##########3 Composition getter functions ############
 # by mole fraction
