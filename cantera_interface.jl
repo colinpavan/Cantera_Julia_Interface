@@ -4,6 +4,7 @@ export one_atm, Ru
 using Libdl
 const one_atm=101325.0
 const Ru=8314.46261815324
+const kb=1.380649e-23
 # this will find cantera provide libcantera_shared.so is on your system path
 # if statement ensures library only opened once
 if @isdefined lib

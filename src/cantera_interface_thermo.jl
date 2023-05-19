@@ -4,7 +4,7 @@ Interface to cantera/src/clib/ct.cpp file thermo objects
 This contains all information about the thermodynamic state and composition
 Notes: 
 1. Cantera treats temp and density as independent variables
-    it will hold there constant UNLESS they are explicitly changed
+    it will hold these constant UNLESS they are explicitly changed
     or pressure is directly changed
 
 

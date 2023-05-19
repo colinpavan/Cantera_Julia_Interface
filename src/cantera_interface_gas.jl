@@ -6,6 +6,12 @@ Calls 3 separate functions for dealing with thermo, kinetics and transport
 C. Pavan 2022-10-28
 =#
 ####################################################
+#=
+Primary object is a Julia struct named "gas"
+This stores all information for interfacing with c++ code in Julia
+All functions take the gas object as an argument
+=#
+
 
 
 ####### Structure definition and initialization ######
@@ -20,6 +26,12 @@ end
 
 # case for not initializing TPX
 function gas(file::String; full_path::Bool=true)
+    #=
+    Opens the yaml file "file" in cantera
+    and initializes the thermo, kinetics and transport cabinets
+    full_path=false means will search in the default location
+    full_path=true (default) tells program to expect file is absolute path to the mechanism
+    =#
     phase=thermo_base(file,full_path=full_path)
     kin=kin_base(file,phase, full_path=full_path)
     trans=trans_base(phase)
@@ -31,6 +43,9 @@ end
 # case for initializing TPX
 function gas(file::String, init_TPX::Tuple{Float64,Float64,Union{String,Float64}};
     full_path::Bool=true)
+    #=
+    Same as above except will allso initialize the state using TPX (Temp/Pressure/Mole Fraction)
+    =#
     phase=thermo_base(file,full_path=full_path)
     kin=kin_base(file,phase, full_path=full_path)
     trans=trans_base(phase)
@@ -160,15 +175,15 @@ function get_spec_heat_ratio(G::gas)
 end
 
 function get_n(G::gas)
-   return get_X(G.phase)*(get_P(G.phase)/(1.380649e-23*get_T(G.phase))) 
+   return get_X(G.phase)*(get_P(G.phase)/(kb*get_T(G.phase))) 
 end
 
 function get_ncm3(G::gas)
-    return get_X(G.phase)*(get_P(G.phase)/(1.380649e-17*get_T(G.phase))) 
+    return get_X(G.phase)*(get_P(G.phase)/(kb*get_T(G.phase))) 
  end
  
 
-##########3 Composition getter functions ############
+########## Composition getter functions ############
 # by mole fraction
 function get_X(G::gas)
     return get_X(G.phase)
@@ -217,65 +232,3 @@ end
 function get_ERY(G)
     return (get_e(G),get_rho(G),get_Y(G))
 end
-
-
-
-# # this evaluates all the above and stores them in local variables
-# # makes it so only need to access cantera on update
-# # not on repeat calls
-# # intentionally does NOT do all variables - only the ones needed for a flame
-# mutable struct gas_local
-#     G::gas
-#     T::Float64
-#     P::Float64
-#     Y::Array{Float64,1}
-#     X::Array{Float64,1}
-#     λ::Float64
-#     cp::Float64
-#     R::Float64
-#     rho::Float64
-#     spec_MW::Array{Float64,1}
-#     mean_MW::Float64
-#     partial_molar_cp::Array{Float64,1}
-#     D_mix::Array{Float64,1}
-#     net_production_rates::Array{Float64,1}
-#     hdot::Float64
-# end
-
-# function update_gas(GL::gas_local; thermal_only=false)
-#     GL.T=get_T(GL.G)
-#     GL.X.=get_X(GL.G)
-#     GL.Y.=get_Y(GL.G)
-#     GL.λ=get_λ(GL.G)
-#     GL.cp=get_cp(GL.G)
-#     GL.rho=get_rho(GL.G)
-#     GL.mean_MW=get_mean_MW(GL.G)
-#     GL.partial_molar_cp.=get_spec_molar_cp(GL.G)
-#     GL.D_mix.=get_D_mix(GL.G)
-#     if !thermal_only
-#         GL.net_production_rates=net_production_rates(GL.G)
-#         GL.hdot=hdot(GL.G)
-#         GL.R=Ru./GL.mean_MW
-#     end
-#     return nothing
-# end
-
-# function gas_local(G::gas)
-#     return gas_local(
-#         G,
-#         get_T(G),
-#         get_P(G),
-#         get_X(G),
-#         get_Y(G),
-#         get_λ(G),
-#         get_cp(G),
-#         get_cp(G).-get_cv(G),
-#         get_rho(G),
-#         get_MW(G),
-#         get_mean_MW(G),
-#         get_spec_molar_cp(G),
-#         get_D_mix(G),
-#         net_production_rates(G),
-#         hdot(G)
-#     )
-# end
